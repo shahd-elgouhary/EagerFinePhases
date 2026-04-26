@@ -1,5 +1,7 @@
 module.exports = {
-  content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}",
+  content: [
+    "./client/index.html",
+    "./client/src/**/*.{js,jsx,ts,tsx}",
     "./src/**/*.{html,js,ts,jsx,tsx}",
     "app/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
@@ -40,6 +42,11 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        brand: {
+          dark: "#1a281e",
+          green: "#4c7a5a",
+          cream: "#fdfbef",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -56,6 +63,8 @@ module.exports = {
           '"Segoe UI Symbol"',
           '"Noto Color Emoji"',
         ],
+        cairo: ["Cairo", "Helvetica", "sans-serif"],
+        "public-sans": ["Public Sans", "Helvetica", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
