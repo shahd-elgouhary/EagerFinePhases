@@ -1,72 +1,68 @@
 # Econova – Environmental Campaign Tracker
 
-A production-ready multi-page web application built from a Figma design (file key: jJKhdzlD3Tqls1Ycf2Jf54). Features a full campaign tracker with interactive map, explore feed, user profile, and auth pages.
+A production-ready multi-page web application built from a Figma design. Features a full campaign tracker with interactive map, explore feed, user profile, and auth pages.
 
 ## Architecture
 
-- **Frontend**: React 18 + Vite + TypeScript, served via Express
-- **Backend**: Express 5 + Drizzle ORM
-- **Styling**: Tailwind CSS, shadcn/ui components
+- **Framework**: Next.js 14 (App Router), TypeScript
+- **Styling**: Tailwind CSS v3, shadcn/ui components (Radix UI primitives)
 - **Icons**: Lucide React, react-icons/si (social logos)
-- **Routing**: Wouter
-- **Data fetching**: TanStack Query v5
-- **Fonts**: Cairo (headings), Public Sans (body)
+- **Fonts**: Cairo (headings), Public Sans (body) — loaded via `next/font/google`
+- **Port**: 5000 via `next dev -p 5000`
+- **Workflow**: "Start application" → `next dev -p 5000`
 
 ## Design Tokens
 
-- `#1a281e` — dark forest green (primary bg, headings)
-- `#4c7a5a` — mid-green (accents, buttons, active states)
-- `#fdfbef` — cream (main background)
-- `#e7e5e4` / `stone-200` — border/divider color
+- Dark: `#1a281e` (forest dark green)
+- Green: `#4c7a5a` (mid green, primary accent)
+- Cream: `#fdfbef` (background)
 
-## Routes
-
-| Path | Component | Description |
-|------|-----------|-------------|
-| `/` | HomePage | Landing page with hero, before/after slider, activity feed |
-| `/map` | InteractiveMap | Interactive map with campaign pins & sidebar |
-| `/explore` | ExplorePage | Social feed with search/filter/tabs |
-| `/campaigns` | CampaignsPage | Campaign grid with search/filter |
-| `/profile` | UserProfilePage | User profile with tabs (Posts/Campaigns/Impact) |
-| `/sign-in` | SignInPage | Auth page (two-panel layout) |
-| `/sign-up` | SignUpPage | Auth page (two-panel layout) |
-
-## Project Structure
+## Route Structure
 
 ```
-client/
-  src/
-    data/campaigns.ts               — Static campaign data (3 campaigns)
-    components/
-      AppShell.tsx                  — Layout wrapper: sticky nav header + main content
-      ui/                           — shadcn/ui component library
-    pages/
-      HomePage.tsx                  — Hero + before/after slider + 3-col activity feed
-      InteractiveMap.tsx            — Map page (no own header; AppShell provides it)
-      CampaignsPage.tsx             — Campaign grid with type filter & search
-      ExplorePage.tsx               — Post feed with trending tags sidebar
-      UserProfilePage.tsx           — Profile header + tabbed post/campaign/impact view
-      SignInPage.tsx                — Two-panel auth page
-      SignUpPage.tsx                — Two-panel auth page
-      sections/
-        CampaignOverviewSidebarSection.tsx  — Sidebar for selected campaign
-        InteractiveCampaignMapSection.tsx   — Interactive map with pins
-        PrimaryNavigationHeaderSection.tsx  — (legacy, not used in main routing)
-server/
-  index.ts                          — Express entry point
-  routes.ts                         — API routes
-  storage.ts                        — In-memory storage interface
-shared/
-  schema.ts                         — Drizzle schema + Zod types
+app/
+  layout.tsx              # Root layout: html/body + fonts + globals.css
+  globals.css             # Tailwind base + custom CSS variables
+  (main)/
+    layout.tsx            # Adds Navbar to all main routes
+    page.tsx              # / Home — hero, before/after slider, 3-col activity feed
+    campaigns/page.tsx    # /campaigns — filterable campaign grid
+    explore/page.tsx      # /explore — social feed with tabs + sidebar
+    map/page.tsx          # /map — interactive campaign map with sidebar panel
+    profile/page.tsx      # /profile — user profile with tabs and impact stats
+  sign-in/
+    layout.tsx            # Auth layout (no Navbar)
+    page.tsx              # /sign-in — two-panel auth page
+  sign-up/
+    layout.tsx            # Auth layout (no Navbar)
+    page.tsx              # /sign-up — two-panel registration page
 ```
 
-## Static Assets
+## Component Structure
 
-All Figma-extracted images are in `client/public/figmaAssets/`. Referenced as `/figmaAssets/...` in code.
+```
+components/
+  Navbar.tsx        # Sticky top nav with active link highlighting, search, mobile drawer
+  CampaignCard.tsx  # Before/After bento card with progress bar and stats
+  PostCard.tsx      # Social post card with like/save interactions
+  Sidebar.tsx       # Campaign detail panel used on /map
+  ui/
+    avatar.tsx
+    badge.tsx
+    button.tsx
+    input.tsx
+    label.tsx
+    progress.tsx
+lib/
+  utils.ts          # cn() helper (clsx + tailwind-merge)
+  campaigns.ts      # Campaign data + liveActivities arrays
+```
 
-## Key Notes
+## Key Features
 
-- No real database needed — uses MemStorage
-- Auth pages (`/sign-in`, `/sign-up`) skip the AppShell (no nav header)
-- InteractiveMap fills `calc(100vh - 80px)` since AppShell header is 80px
-- Map pin search/filter is internal to InteractiveCampaignMapSection
+- **Home**: Drag-to-compare Before/After slider, 3-column community feed (trending posts, active campaigns, global stats)
+- **Map**: Full-screen map with campaign pins, animated live-activity ticker, collapsible sidebar with detailed campaign info
+- **Campaigns**: Search + type filter (Campaign Hub / Impact Site), responsive 3-col grid
+- **Explore**: Trending/Recent/Following feed tabs, post cards with like/save, sidebar with tags and stats
+- **Profile**: Avatar, cover, stats, badges, tabbed Posts/Campaigns/Impact views
+- **Auth**: No-Navbar two-panel layout (brand panel left, form right) with OAuth buttons
