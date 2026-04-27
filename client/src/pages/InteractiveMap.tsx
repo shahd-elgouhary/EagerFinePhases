@@ -2,7 +2,6 @@ import { useState } from "react";
 import { campaigns } from "@/data/campaigns";
 import { CampaignOverviewSidebarSection } from "./sections/CampaignOverviewSidebarSection";
 import { InteractiveCampaignMapSection } from "./sections/InteractiveCampaignMapSection";
-import { PrimaryNavigationHeaderSection } from "./sections/PrimaryNavigationHeaderSection";
 import { PanelLeftOpen } from "lucide-react";
 
 export const InteractiveMap = (): JSX.Element => {
@@ -19,16 +18,12 @@ export const InteractiveMap = (): JSX.Element => {
   };
 
   return (
-    <main
-      className="w-full min-h-screen bg-[#fdfbef]"
+    <div
+      className="w-full bg-[#fdfbef]"
+      style={{ height: "calc(100vh - 80px)" }}
       data-testid="interactive-map-page"
     >
-      <PrimaryNavigationHeaderSection
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-
-      <div className="flex w-full items-start relative" style={{ height: "calc(100vh - 80px)" }}>
+      <div className="flex w-full items-start relative h-full">
         {/* Sidebar */}
         <div
           className={`shrink-0 h-full transition-all duration-300 ease-in-out overflow-hidden ${
@@ -66,6 +61,6 @@ export const InteractiveMap = (): JSX.Element => {
           />
         </div>
       </div>
-    </main>
+    </div>
   );
 };
