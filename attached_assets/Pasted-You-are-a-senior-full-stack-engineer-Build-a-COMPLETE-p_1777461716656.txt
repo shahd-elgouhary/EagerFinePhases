@@ -1,0 +1,148 @@
+You are a senior full-stack engineer.
+
+Build a COMPLETE production-ready web application using:
+
+- HTML5
+- CSS3 (no frameworks unless necessary)
+- Vanilla JavaScript
+- PHP (no frameworks like Laravel)
+- MySQL
+
+----------------------------------------
+
+🎯 PROJECT REQUIREMENTS
+
+Recreate a modern social/campaign platform based on this Figma design:
+https://www.figma.com/design/jJKhdzlD3Tqls1Ycf2Jf54/UI
+
+IMPORTANT:
+- Follow the design EXACTLY (colors, spacing, typography, layout)
+- Do NOT invent UI elements not in the design
+
+----------------------------------------
+
+🧱 ARCHITECTURE
+
+Use a clean modular structure:
+
+/public
+  index.php
+  map.php
+  campaigns.php
+  explore.php
+  profile.php
+  sign-in.php
+  sign-up.php
+
+/components
+  navbar.php
+  sidebar.php
+  card.php
+  campaign-card.php
+  post-card.php
+
+/config
+  db.php
+
+/handlers
+  auth.php
+  posts.php
+  campaigns.php
+
+/assets
+  /css/style.css
+  /js/main.js
+
+----------------------------------------
+
+🧩 FEATURES
+
+1. Authentication System
+- Sign up / Sign in (PHP sessions)
+- Password hashing (password_hash)
+- Secure login handling
+
+2. Database (MySQL)
+Create and use:
+- users table
+- posts table
+- campaigns table
+
+3. Pages
+
+Home (/)
+- Display posts dynamically from database
+
+Map (/map)
+- UI page (no fake logic)
+
+Campaigns (/campaigns)
+- List campaigns from database
+
+Explore (/explore)
+- Show posts or discovery content
+
+Profile (/profile)
+- Show user data
+
+Auth Pages
+- Sign-in and Sign-up WITHOUT navbar
+
+----------------------------------------
+
+🎨 UI & UX
+
+- Fully responsive (mobile-first)
+- Match Figma design exactly
+- Hover effects on buttons
+- Active link highlighting in navbar
+- Clean spacing and alignment
+
+----------------------------------------
+
+⚙️ CODE QUALITY RULES
+
+- NO inline CSS
+- NO duplicated code
+- Use reusable PHP components (include/require)
+- Use prepared statements for SQL (security)
+- No unused files or dead code
+- Clean readable structure
+
+----------------------------------------
+
+🔒 SECURITY
+
+- Use prepared statements (mysqli or PDO)
+- Escape output (XSS protection)
+- Use sessions securely
+
+----------------------------------------
+
+📦 OUTPUT REQUIREMENTS
+
+- Provide FULL working code (all files)
+- No pseudo-code
+- No missing imports
+- No placeholders like "TODO"
+
+----------------------------------------
+
+🚫 DO NOT
+
+- Do NOT use frameworks (no Laravel, no React)
+- Do NOT skip database integration
+- Do NOT simplify UI
+
+----------------------------------------
+
+Start by:
+1. Creating the database schema (SQL)
+2. Setting up db connection
+3. Building reusable components
+4. Implementing Home page
+5. Then all other pages
+
+----------------------------------------
+
+Think like a senior engineer and build it clean, scalable, and production-ready.
