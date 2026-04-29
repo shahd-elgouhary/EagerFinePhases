@@ -1,29 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { TrendingUp, Clock, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { TrendingUp, Clock, Search, Heart, MessageCircle, Share2, Bookmark, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PostCard, type Post } from "@/components/PostCard";
+import { Badge } from "@/components/ui/badge";
+import { api } from "@/lib/api";
 
 const feedTabs = ["Trending", "Recent", "Following"] as const;
 type FeedTab = typeof feedTabs[number];
 
-const posts: Post[] = [
-  { id: 1, author: "Elena Marcas", handle: "@elena.marcas", avatar: "/figmaAssets/ab6axuanvojescuf1mrvnj0ya58xp8gi3mtvhndatzhm47yd3ykaop3v-tnlwexd.png", time: "2h ago", image: "/figmaAssets/ab6axudchdf5r2xqdnkqp20bjpqrddkqdhkr-c1ocltlckgacao5no7-hmvxt0-c.png", tag: "Reforestation", tagColor: "bg-[#4c7a5a1a] text-[#4c7a5a]", title: "Planted 50 native oaks in the Retiro buffer zone today.", body: "The soil was perfect after the morning rain. Special thanks to the local nursery for the saplings! This is our 3rd week on-site and the progress is incredible.", location: "Tulum, Mexico", likes: 124, comments: 18, campaign: "Coastal Reforestation Project", saved: false },
-  { id: 2, author: "Carlos Ruiz", handle: "@carlos.ruiz", avatar: "/figmaAssets/ab6axuanvojescuf1mrvnj0ya58xp8gi3mtvhndatzhm47yd3ykaop3v-tnlwexd.png", time: "5h ago", image: "/figmaAssets/ab6axucjk39usfnoqzursffugo-bi9--iio7detul2eklqdm-4ng5gzw5c12dtoq.png", tag: "Wildlife", tagColor: "bg-orange-50 text-orange-500", title: "2 years later, the burned hill is showing signs of life.", body: "Biodiversity is returning! We counted 12 new bird species this month alone. The recovery is real and it's breathtaking to witness.", location: "Cancún, Mexico", likes: 89, comments: 31, campaign: "Mangrove Sanctuary Revival", saved: true },
-  { id: 3, author: "Sofia Méndez", handle: "@sofia.mendez", avatar: "/figmaAssets/ab6axuanvojescuf1mrvnj0ya58xp8gi3mtvhndatzhm47yd3ykaop3v-tnlwexd.png", time: "1d ago", image: "/figmaAssets/ab6axudchdf5r2xqdnkqp20bjpqrddkqdhkr-c1ocltlckgacao5no7-hmvxt0-c.png", tag: "Wetlands", tagColor: "bg-blue-50 text-blue-500", title: "Chetumal Bay restoration: Phase 2 complete.", body: "We've cleared 3 hectares of invasive species and replanted with native wetland flora. The team was amazing — 47 volunteers showed up on a Saturday!", location: "Chetumal, Mexico", likes: 203, comments: 45, campaign: "Wetland Restoration Initiative", saved: false },
-  { id: 4, author: "Mateo Vega", handle: "@mateo.vega", avatar: "/figmaAssets/ab6axuanvojescuf1mrvnj0ya58xp8gi3mtvhndatzhm47yd3ykaop3v-tnlwexd.png", time: "2d ago", image: "/figmaAssets/ab6axucjk39usfnoqzursffugo-bi9--iio7detul2eklqdm-4ng5gzw5c12dtoq.png", tag: "Urban Garden", tagColor: "bg-purple-50 text-purple-500", title: "Urban rooftop garden turned community hub.", body: "Started with 12 raised beds. Now we have 80+ families growing their own food and our carbon offset score has tripled.", location: "Mexico City, Mexico", likes: 157, comments: 22, campaign: "Coastal Reforestation Project", saved: false },
-];
+function timeAgo(date: string | null) {
+  if (!date) return "";
+  const diff = Date.now() - new Date(date).getTime();
+  const h = Math.floor(diff / 3600000);
+  if (h < 1) return "just now";
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
 
 export default function ExplorePage() {
   const [tab, setTab] = useState<FeedTab>("Trending");
   const [search, setSearch] = useState("");
+  const [posts, setPosts] = useState<any[]>([]);
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
 
-  const filtered = posts.filter(
-    (p) => !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.author.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    api.getPosts().then(setPosts).finally(() => setLoading(false));
+  }, []);
+
+  const handleLike = async (postId: string) => {
+    try {
+      const result = await api.likePost(postId);
+      setLikedPosts((prev) => { const n = new Set(prev); result.liked ? n.add(postId) : n.delete(postId); return n; });
+      setPosts((prev) => prev.map((p) => p.id === postId ? { ...p, likes: result.count } : p));
+    } catch {}
+  };
+
+  const handleSave = async (postId: string) => {
+    try {
+      const result = await api.savePost(postId);
+      setSavedPosts((prev) => { const n = new Set(prev); result.saved ? n.add(postId) : n.delete(postId); return n; });
+    } catch {}
+  };
+
+  const sortedPosts = [...posts].sort((a, b) =>
+    tab === "Trending" ? (b.likes - a.likes) : (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  );
+
+  const filtered = sortedPosts.filter((p) =>
+    !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.author?.displayName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -34,10 +64,8 @@ export default function ExplorePage() {
           <p className="font-public-sans text-sm text-stone-500">Stories and updates from the global steward community</p>
         </div>
       </div>
-
       <div className="mx-auto max-w-screen-xl px-5 sm:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Feed */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <div className="relative flex-1">
@@ -55,11 +83,46 @@ export default function ExplorePage() {
               </div>
             </div>
             <div className="flex flex-col gap-5">
-              {filtered.map((p) => <PostCard key={p.id} post={p} />)}
+              {loading ? Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="rounded-2xl border border-stone-100 bg-white overflow-hidden animate-pulse"><div className="h-52 bg-stone-100" /><div className="p-6 flex flex-col gap-3"><div className="h-5 w-3/4 bg-stone-100 rounded" /><div className="h-3 w-full bg-stone-100 rounded" /></div></div>
+              )) : filtered.map((post) => (
+                <article key={post.id} className="rounded-2xl border border-stone-100 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow" data-testid={`card-post-${post.id}`}>
+                  <div className="relative">
+                    <div className="h-52 w-full bg-cover bg-center" style={{ backgroundImage: `url(${post.imageUrl})` }} />
+                    {post.tag && <Badge className="absolute top-3 left-3 rounded-full text-[10px] px-2.5 py-1 border-0 bg-black/50 text-white backdrop-blur-sm">{post.tag}</Badge>}
+                  </div>
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9"><AvatarImage src={post.author?.avatarUrl ?? ""} /><AvatarFallback>{post.author?.displayName?.[0] ?? "U"}</AvatarFallback></Avatar>
+                        <div><p className="font-public-sans text-sm font-medium text-[#1a281e]">{post.author?.displayName}</p><p className="font-public-sans text-xs text-stone-400">@{post.author?.username} · {timeAgo(post.createdAt)}</p></div>
+                      </div>
+                      {post.location && <div className="hidden sm:flex items-center gap-1.5 text-stone-400"><MapPin className="h-3 w-3" /><span className="font-public-sans text-xs">{post.location}</span></div>}
+                    </div>
+                    <h3 className="font-cairo text-xl text-[#1a281e] mb-2">{post.title}</h3>
+                    <p className="font-public-sans text-sm text-stone-500 leading-6">{post.body}</p>
+                    {post.campaignTitle && (
+                      <div className="mt-3">
+                        <Link href="/campaigns"><Badge className="rounded-full bg-[#4c7a5a1a] text-[#4c7a5a] font-public-sans text-xs px-2.5 py-1 border-0 cursor-pointer">{post.campaignTitle}</Badge></Link>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-stone-100">
+                      <div className="flex items-center gap-4">
+                        <button onClick={() => handleLike(post.id)} className={`flex items-center gap-1.5 font-public-sans text-sm transition-colors ${likedPosts.has(post.id) ? "text-red-500" : "text-stone-400 hover:text-red-400"}`} data-testid={`button-like-${post.id}`}>
+                          <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? "fill-red-500" : ""}`} />{post.likes}
+                        </button>
+                        <button className="flex items-center gap-1.5 font-public-sans text-sm text-stone-400"><MessageCircle className="h-4 w-4" />{post.comments}</button>
+                        <button className="flex items-center gap-1.5 font-public-sans text-sm text-stone-400"><Share2 className="h-4 w-4" />Share</button>
+                      </div>
+                      <button onClick={() => handleSave(post.id)} className={`transition-colors ${savedPosts.has(post.id) ? "text-[#4c7a5a]" : "text-stone-400 hover:text-stone-600"}`} data-testid={`button-save-${post.id}`}>
+                        <Bookmark className={`h-4 w-4 ${savedPosts.has(post.id) ? "fill-[#4c7a5a]" : ""}`} />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
-
-          {/* Sidebar */}
           <aside className="w-full lg:w-72 shrink-0 flex flex-col gap-4">
             <div className="rounded-2xl border border-stone-100 bg-white shadow-sm p-5">
               <h3 className="font-cairo text-base text-[#1a281e] mb-4">Trending Tags</h3>
@@ -69,24 +132,10 @@ export default function ExplorePage() {
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl bg-[#1a281e] p-5 shadow-sm">
+            <div className="rounded-2xl bg-[#1a281e] p-5">
               <h3 className="font-cairo text-base text-white mb-2">Start a Campaign</h3>
               <p className="font-public-sans text-xs text-stone-400 mb-4">Have an area that needs restoration? Create a campaign and invite your community.</p>
-              <Link href="/sign-up">
-                <Button className="w-full h-auto py-2.5 rounded-xl bg-[#4c7a5a] font-public-sans text-sm text-white hover:bg-[#3a6349]">Create Campaign</Button>
-              </Link>
-            </div>
-            <div className="rounded-2xl border border-stone-100 bg-white shadow-sm p-5">
-              <h3 className="font-cairo text-base text-[#1a281e] mb-4">Active Stewards</h3>
-              {[{ name: "Elena Marcas", posts: 12 }, { name: "Carlos Ruiz", posts: 8 }, { name: "Sofia Méndez", posts: 15 }].map((u) => (
-                <div key={u.name} className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-2.5">
-                    <Avatar className="h-8 w-8"><AvatarImage src="/figmaAssets/ab6axuanvojescuf1mrvnj0ya58xp8gi3mtvhndatzhm47yd3ykaop3v-tnlwexd.png" /><AvatarFallback>{u.name[0]}</AvatarFallback></Avatar>
-                    <p className="font-public-sans text-sm text-[#1a281e]">{u.name}</p>
-                  </div>
-                  <span className="font-public-sans text-xs text-stone-400">{u.posts} posts</span>
-                </div>
-              ))}
+              <Link href="/sign-up"><Button className="w-full h-auto py-2.5 rounded-xl bg-[#4c7a5a] font-public-sans text-sm text-white hover:bg-[#3a6349]">Create Campaign</Button></Link>
             </div>
           </aside>
         </div>

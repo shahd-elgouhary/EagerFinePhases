@@ -1,3 +1,7 @@
 {
-  "/(main)/page": "app/(main)/page.js"
+  "/api/posts/route": "app/api/posts/route.js",
+  "/api/campaigns/route": "app/api/campaigns/route.js",
+  "/api/stats/route": "app/api/stats/route.js",
+  "/(main)/page": "app/(main)/page.js",
+  "/(main)/campaigns/page": "app/(main)/campaigns/page.js"
 }
